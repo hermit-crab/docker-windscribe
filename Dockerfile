@@ -35,15 +35,23 @@ RUN apt -y update && apt -y dist-upgrade && apt install -y gnupg apt-utils ca-ce
      apt-key adv --keyserver keyserver.ubuntu.com --recv-key FDC247B7 && echo 'deb https://repo.windscribe.com/ubuntu bionic main' | tee /etc/apt/sources.list.d/windscribe-repo.list && \
      echo "resolvconf resolvconf/linkify-resolvconf boolean false" | debconf-set-selections && \
      apt -y update && apt -y dist-upgrade && apt install -y windscribe-cli && \
-     apt install -y curl net-tools iputils-tracepath && \
+     apt install -y curl net-tools iputils-tracepath build-essential automake git && \
      apt -y autoremove && apt -y clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Install tinyproxy
+RUN cd /opt && git clone https://github.com/tinyproxy/tinyproxy.git &&\
+    cd tinyproxy && ./autogen.sh && ./configure && make && make install &&\
+    mkdir -p /usr/local/var/log/tinyproxy &&\
+    touch /usr/local/var/log/tinyproxy/tinyproxy.log &&\
+    useradd -M -U -s /bin/false tinyproxy &&\
+    chown tinyproxy:root /usr/local/var/log/tinyproxy/tinyproxy.log
 
 # Add in the docker user
 RUN groupadd -r docker_group  && useradd -r -d /config -g docker_group docker_user
 
 # Add in scripts for health check and start-up
 ADD scripts /opt/scripts/
+COPY tinyproxy.conf.tmpl /opt/tinyproxy/
 
 # Enable the health check for the VPN and app
 HEALTHCHECK --interval=5m --timeout=60s \

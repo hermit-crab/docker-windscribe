@@ -1,4 +1,4 @@
-# Docker Windscribe Image
+# Docker Windscribe Image (+ with basic tinyproxy included)
 
 ## About the image
 
