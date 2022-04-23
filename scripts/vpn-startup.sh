@@ -5,9 +5,7 @@ mkdir -p /dev/net
 mknod /dev/net/tun c 10 200
 chmod 0666 /dev/net/tun
 
-# Create docker user
-usermod -u $PUID docker_user
-groupmod -g $PGID docker_group
+# Setup docker_user ownerships
 chown -R docker_user:docker_group /config
 
 # Start the windscribe service
@@ -82,4 +80,3 @@ echo "Port forward is $VPN_PORT"
 
 # Run the user app in the docker container
 su -w VPN_PORT -g docker_group - docker_user -c "/opt/scripts/app-startup.sh"
-

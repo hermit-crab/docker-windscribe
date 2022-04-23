@@ -38,16 +38,15 @@ RUN apt -y update && apt -y dist-upgrade && apt install -y gnupg apt-utils ca-ce
      apt install -y curl net-tools iputils-tracepath build-essential automake git && \
      apt -y autoremove && apt -y clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Add in the docker user
+RUN groupadd -r docker_group && useradd -r -d /config -g docker_group docker_user
+
 # Install tinyproxy
 RUN cd /opt && git clone https://github.com/tinyproxy/tinyproxy.git &&\
     cd tinyproxy && ./autogen.sh && ./configure && make && make install &&\
     mkdir -p /usr/local/var/log/tinyproxy &&\
     touch /usr/local/var/log/tinyproxy/tinyproxy.log &&\
-    useradd -M -U -s /bin/false tinyproxy &&\
-    chown tinyproxy:root /usr/local/var/log/tinyproxy/tinyproxy.log
-
-# Add in the docker user
-RUN groupadd -r docker_group  && useradd -r -d /config -g docker_group docker_user
+    chown docker_user:docker_group /usr/local/var/log/tinyproxy/tinyproxy.log
 
 # Add in scripts for health check and start-up
 ADD scripts /opt/scripts/
